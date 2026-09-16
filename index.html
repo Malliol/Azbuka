@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Учим алфавит</title>
+<style>
+  :root {
+    --bg1: #6a5acd;
+    --bg2: #ff7eb3;
+    --card-bg: #ffffff;
+    --text: #2b2b3d;
+    --accent: #6a5acd;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    padding: 24px;
+  }
+  h1 {
+    color: white;
+    margin-bottom: 8px;
+    font-size: 22px;
+    text-align: center;
+  }
+  p.subtitle {
+    color: rgba(255,255,255,0.85);
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 14px;
+    text-align: center;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    width: min(320px, 80vw);
+    height: min(320px, 80vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+    position: relative;
+  }
+  .card:active {
+    transform: scale(0.96);
+  }
+  .letters {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .letter {
+    font-size: 96px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    transition: opacity 0.15s ease;
+  }
+  .letter.lower {
+    font-size: 80px;
+  }
+  .hint {
+    margin-top: 16px;
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    text-align: center;
+  }
+  .progress {
+    margin-top: 20px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+  }
+  button {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  button:active {
+    transform: scale(0.96);
+  }
+  .fade {
+    opacity: 0;
+  }
+  #playBtn {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 16px;
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+    cursor: pointer;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #playBtn:active {
+    transform: scale(0.96);
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="letters" id="letters">
+    <span class="letter upper" id="upper">A</span>
+    <span class="letter lower" id="lower">a</span>
+  </div>
+</div>
+
+<button id="playBtn" aria-label="Прослушать букву">🔊</button>
+
+<div class="hint">нажми на карточку, чтобы сменить букву</div>
+
+<script>
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let alphabet = shuffleArray("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
+  let index = 0;
+
+  const upperEl = document.getElementById("upper");
+  const lowerEl = document.getElementById("lower");
+  const lettersEl = document.getElementById("letters");
+  const card = document.getElementById("card");
+
+  function render() {
+    const letter = alphabet[index];
+    upperEl.textContent = letter;
+    lowerEl.textContent = letter.toLowerCase();
+  }
+
+  function transitionTo(newIndex) {
+    lettersEl.classList.add("fade");
+    setTimeout(() => {
+      index = newIndex;
+      render();
+      lettersEl.classList.remove("fade");
+    }, 120);
+  }
+
+  function next() {
+    transitionTo((index + 1) % alphabet.length);
+  }
+
+  function prev() {
+    transitionTo((index - 1 + alphabet.length) % alphabet.length);
+  }
+
+  function shuffle() {
+    alphabet = shuffleArray(alphabet);
+    transitionTo(0);
+  }
+
+  function speakLetter() {
+    if (!('speechSynthesis' in window)) return;
+    const letter = alphabet[index].toLowerCase();
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const utter = new SpeechSynthesisUtterance(letter);
+      utter.lang = "en-US";
+      utter.rate = 0.85;
+      window.speechSynthesis.speak(utter);
+    }, 30);
+  }
+
+  card.addEventListener("click", next);
+  document.getElementById("playBtn").addEventListener("click", speakLetter);
+
+  render();
+</script>
+
+</body>
+</html>
